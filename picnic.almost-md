@@ -1,11 +1,11 @@
 {% set cart_value = "{:.2f}".format(states('sensor.picnic_cart_total_price') | float(0)) %}
 {% set last_order_value = "{:.2f}".format(states('sensor.picnic_total_price_of_last_order') | float(0)) %}
 {% set total_item_count = states('sensor.picnic_cart_items_count') %}
-{% if states('sensor.picnic_expected_start_of_next_delivery') != 'unknown' %}
-{% set tts = ((states('sensor.picnic_expected_start_of_next_delivery')|as_datetime|as_local - now()).total_seconds() / 60) |int %}
-{% set tte = ((states('sensor.picnic_expected_end_of_next_delivery')|as_datetime|as_local - now()).total_seconds() / 60) |int %}
-{% if tte > 0 %}**Next grocery delivery**: {{ states('sensor.picnic_expected_start_of_next_delivery') | as_timestamp | timestamp_custom("%H:%M")  }} - {{ states('sensor.picnic_expected_end_of_next_delivery') | as_timestamp | timestamp_custom("%H:%M")  }}
-With {{total_item_count}} items, worth € {{last_order_value}}
+{% if states('sensor.picnic_start_of_next_delivery_s_slot') != 'unknown' %}
+{% set tts = ((states('sensor.picnic_start_of_next_delivery_s_slot')|as_datetime|as_local - now()).total_seconds() / 60) |int %}
+{% set tte = ((states('sensor.picnic_end_of_next_delivery_s_slot')|as_datetime|as_local - now()).total_seconds() / 60) |int %}
+{% if tte > 0 %}**Next grocery delivery**: {{ states('sensor.picnic_start_of_next_delivery_s_slot') | as_timestamp | timestamp_custom("%a %H:%M")  }} - {{ states('sensor.picnic_end_of_next_delivery_s_slot')|as_datetime|as_local | as_timestamp | timestamp_custom("%H:%M")  }}
+With €{{last_order_value}} worth of groceries.
 {% endif %}
 {% if tts < 60 %}
 {% if tts > 0 %}(in {{tts}} minutes)
@@ -13,7 +13,6 @@ With {{total_item_count}} items, worth € {{last_order_value}}
 {% if tte > 0 %}({{ tte }} minutes left){% endif %}
 {% endif %}
 {% endif %}
-{% if states('sensor.picnic_max_order_time_of_last_order') | as_timestamp > now() | as_timestamp %}You can still add items till {{states('sensor.picnic_max_order_time_of_last_order') | as_timestamp | timestamp_custom("%d-%m %H:%M") }} {%endif %}
+{% if states('sensor.picnic_max_order_time_of_last_order') | as_timestamp > now() | as_timestamp %}[You can still add items till {{states('sensor.picnic_max_order_time_of_last_order') | as_timestamp | timestamp_custom("%a %H:%M") }}](/todo?entity_id=todo.picnic_shopping_cart) {%endif %}
 {% else %}**No groceries on their way today** {% if cart_value|float > 0 %} - Current cart has {{total_item_count}} items worth €{{cart_value}} {% endif %}[Edit cart](/todo?entity_id=todo.picnic_shopping_cart)
 {% endif %}
-
